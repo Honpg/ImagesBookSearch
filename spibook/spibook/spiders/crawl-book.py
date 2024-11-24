@@ -53,7 +53,7 @@ class SipSpider(CrawlSpider):
 
 
      def download_image(self, image_url, gerne):
-          folder_path = f"D:/study/OJT/PROJECT/books/{gerne}/"
+          folder_path = f"./project/books/{gerne}/"
      
           if image_url:
                # Create a valid filename from the product name (remove invalid characters)
