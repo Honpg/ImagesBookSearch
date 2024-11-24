@@ -8,9 +8,9 @@ class SipSpider(CrawlSpider):
      allowed_domains = ['fahasa.com']
      start_urls = []
 
-     types = ["kinh-te-chinh-tri-phap-ly", "van-hoc-trong-nuoc", "sach-hoc-ngoai-ngu"]
+     types = ["tam-ly-ky-nang-song", "kinh-te-chinh-tri-phap-ly", "khoa-hoc-ky-thuat"]
      for type in types:
-          for page in range(1, 10):
+          for page in range(1, 5):
                start_urls.append(f"https://www.fahasa.com/sach-trong-nuoc/{type}.html?order=num_orders&limit=24&p={page}")
 
      rules = [
@@ -19,7 +19,9 @@ class SipSpider(CrawlSpider):
 
      def parse_item(self, response):
           name = self.get_name(response)
+          genre = response.css('div.container-inner.breadcrumbs a::text').getall()[1]
           image_url = self.get_image_url(response)
+          
 
           if not name or not image_url:
                self.logger.warning(f"Skipping item due to missing name or image: {response.url}")
@@ -27,12 +29,12 @@ class SipSpider(CrawlSpider):
 
           item = {
                'name': name,
+               'genre': genre,
                'image_URL': image_url
           }
           
           if image_url:
-               self.download_image(image_url)
-               item['image_local_path'] = self.download_image(image_url)
+               item['image_local_path'] = self.download_image(image_url, genre)
 
           yield item
 
@@ -42,26 +44,7 @@ class SipSpider(CrawlSpider):
           clean_names = [name.strip() for name in names if name.strip()]
           if clean_names:  # Return the first meaningful name
                return clean_names[0]
-
-     
-     '''def get_author(self, response):
-          authors = response.css('div.product-view-sa div.product-view-sa-author span::text').getall()
-          if len(authors) > 1:  
-               author = authors[1].strip()  
-               if author:  
-                    return author
-          elif len(authors) == 1:
-               author = authors[0].strip()
-               if author:
-                    return author'''
-
-
-     '''def get_price(self, response):
-          price = response.css('p.special-price span.price::text').getall()
-          price = price[1].strip().replace("\xa0đ", "")
-          if price:
-               return float(price.replace('.', ''))
-          return None'''
+          
      
      def get_image_url(self, response):
           # Extract the first image URL from the product page (assuming the image is inside <img>)
@@ -69,11 +52,19 @@ class SipSpider(CrawlSpider):
           return image_url
 
 
-     def download_image(self, image_url):
+     def download_image(self, image_url, gerne):
+          folder_path = f"D:/study/OJT/PROJECT/books/{gerne}/"
+     
           if image_url:
                # Create a valid filename from the product name (remove invalid characters)
                image_name = os.path.basename(image_url)
-               save_path = os.path.join("D:/study/OJT/PROJECT/books_image/", image_name)
+
+               # Create a folder to save the image based on the book's gerne
+               if os.path.exists(folder_path):
+                    save_path = os.path.join(folder_path, image_name)
+               else:
+                    os.makedirs(folder_path)
+                    save_path = os.path.join(folder_path, image_name)
 
                # Download the image and save it
                try:
