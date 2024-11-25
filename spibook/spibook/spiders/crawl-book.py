@@ -8,9 +8,17 @@ class SipSpider(CrawlSpider):
      allowed_domains = ['fahasa.com']
      start_urls = []
 
-     types = ["tam-ly-ky-nang-song", "kinh-te-chinh-tri-phap-ly", "khoa-hoc-ky-thuat"]
+     types = ["tam-ly-ky-nang-song", 
+              "kinh-te-chinh-tri-phap-ly", 
+              "khoa-hoc-ky-thuat", 
+              "nu-cong-gia-chanh", 
+              "van-hoa-nghe-thuat-du-lich", 
+              "thieu-nhi", 
+              "tu-dien"
+          ]
+     
      for type in types:
-          for page in range(1, 5):
+          for page in range(1, 30):
                start_urls.append(f"https://www.fahasa.com/sach-trong-nuoc/{type}.html?order=num_orders&limit=24&p={page}")
 
      rules = [
@@ -53,7 +61,8 @@ class SipSpider(CrawlSpider):
 
 
      def download_image(self, image_url, gerne):
-          folder_path = f"./project/books/{gerne}/"
+          folder_path = f"D:/study/OJT/project/books/{gerne}/"
+          folder_path_all = "D:/study/OJT/project/bookss/"
      
           if image_url:
                # Create a valid filename from the product name (remove invalid characters)
@@ -66,9 +75,12 @@ class SipSpider(CrawlSpider):
                     os.makedirs(folder_path)
                     save_path = os.path.join(folder_path, image_name)
 
+               save_path_all = os.path.join(folder_path_all, image_name)
+
                # Download the image and save it
                try:
                     urllib.request.urlretrieve(image_url, save_path)
+                    urllib.request.urlretrieve(image_url, save_path_all)
                     self.logger.info(f"Image saved: {image_name}")
                except Exception as e:
                     self.logger.error(f"Failed to download image {image_name}: {e}")
