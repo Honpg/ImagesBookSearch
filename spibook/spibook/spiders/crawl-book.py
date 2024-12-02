@@ -2,6 +2,7 @@ from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 import urllib.request 
 import os
+import re
 
 class SipSpider(CrawlSpider):
      name = 'spibook'
@@ -51,7 +52,9 @@ class SipSpider(CrawlSpider):
           names = response.css('h1.fhs_name_product_desktop::text').getall()
           clean_names = [name.strip() for name in names if name.strip()]
           if clean_names:  # Return the first meaningful name
-               return clean_names[0]
+               clean_name = clean_names[0]
+               if not re.search("^Combo", clean_name) and not re.search("^Bộ", clean_name):
+                    return clean_name
           
      
      def get_image_url(self, response):
