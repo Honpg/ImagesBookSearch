@@ -77,6 +77,8 @@ class SipSpider(CrawlSpider):
         # Yield the item to store or process further
         yield item
 
+
+
     # Helper function to extract the book's name
     def get_name(self, response):
         # Extract potential names from the product title
@@ -103,11 +105,9 @@ class SipSpider(CrawlSpider):
             author = author.split(", ")  # Split authors into a list
         return author
     
-
     def get_price(self,response):
         price = response.css('div.price-box p.special-price span.price::text').get().strip().replace('\xa0','')
         return price
-
 
     # Helper function to extract the image URL
     def get_image_url(self, response):
@@ -115,18 +115,19 @@ class SipSpider(CrawlSpider):
         image_url = response.css(
             "div.product-essential-media div.product-view-image-product.fhs_img_frame_container img::attr(data-src)"
         ).get()
-        return image_url
-    
-    
 
+        base_url = os.path.basename(image_url)
+        if not re.search("frame", base_url):
+            return image_url
+    
     # Helper function to download the image
     def download_image(self, image_url, genre):
         # Define folder paths for saving images
         folder_path = (
-            f"./books/{genre}/"  # Genre-specific folder
+            f"D:/study/OJT/project/data/books/{genre}/"  # Genre-specific folder
         )
         folder_path_all = (
-            "./bookss/"  # General folder for all images
+            "D:/study/OJT/project/data/bookss"  # General folder for all images
         )
 
         if image_url:
