@@ -1,7 +1,8 @@
 import pandas as pd
 from PIL import Image
 import torch
-import torchvision.models as models
+from torchvision import models
+from torchvision.models import ResNet50_Weights
 import torchvision.transforms as transforms
 import numpy as np
 from sentence_transformers import SentenceTransformer
@@ -26,7 +27,7 @@ class Embedding:
             self.image = None
 
         # Load a pre-trained ResNet-50 model for image feature extraction
-        self.modelImg = models.resnet50(pretrained=True)
+        self.modelImg = models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
         # Remove the classification layer to use as a feature extractor
         self.modelImg = torch.nn.Sequential(*list(self.modelImg.children())[:-1])
         self.modelImg.eval()  # Set model to evaluation mode
@@ -36,13 +37,17 @@ class Embedding:
 
     # Function to create text embeddings
     def Text_embedding(self, column: str) -> np.ndarray:
-        # Check if the DataFrame and the specified column are valid
+        """# Check if the DataFrame and the specified column are valid
         if self.df is None or column not in self.df:
             raise ValueError(f"Invalid DataFrame or column: {column}")
 
         # Generate embeddings for the text in the specified column
-        embedding = self.modelText.encode(self.df[column])
-        return embedding
+        embeddings = []
+        for i in range(len(self.df[column])):
+            embedding = self.modelText.encode(self.df[column].iloc[i])
+            embeddings.append(embedding)
+        return np.array(embeddings)"""
+        pass
 
     # Function to preprocess images before embedding
     def Image_preprocessing(self) -> torch.Tensor:

@@ -27,7 +27,7 @@ class SipSpider(CrawlSpider):
 
     # Generate the `start_urls` dynamically based on categories and pages
     for type in types:
-        for page in range(1, 30):  # Crawl up to 29 pages per category
+        for page in range(1, 31):  # Crawl up to 29 pages per category
             start_urls.append(
                 f"https://www.fahasa.com/sach-trong-nuoc/{type}.html?order=num_orders&limit=24&p={page}"
             )
@@ -52,8 +52,7 @@ class SipSpider(CrawlSpider):
         genre = response.css("div.container-inner.breadcrumbs a::text").getall()[1]
         # Extract the image URL of the book
         image_url = self.get_image_url(response)
-        # Extract the author's name(s)
-        author = self.get_author(response)
+        price = self.get_price(response)
 
         # Skip items missing crucial fields
         if not name or not image_url:
@@ -61,18 +60,19 @@ class SipSpider(CrawlSpider):
                 f"Skipping item due to missing name or image: {response.url}"
             )
             return
-
-        # Create an item dictionary with the extracted data
-        item = {
-            "name": name,
-            "author": author,
-            "genre": genre,
-            "image_URL": image_url,
-        }
-
+        
         # If an image URL is available, download the image and save the local path
         if image_url:
-            item["image_local_path"] = self.download_image(image_url, genre)
+            image_path = self.download_image(image_url, genre)
+
+
+        # Create an item dictionary with the extracted data
+        item = {    
+            "image path": image_path,
+            "title": name,
+            "price": price,
+            "image url": image_url,
+        }
 
         # Yield the item to store or process further
         yield item
@@ -88,7 +88,7 @@ class SipSpider(CrawlSpider):
             # Exclude items like "Combo" or "Bộ" from the product name
             if not re.search("^Combo", clean_name) and not re.search("^Bộ", clean_name):
                 return clean_name
-
+            
     # Helper function to extract the author's name(s)
     def get_author(self, response):
         # Extract the author's name
@@ -102,6 +102,12 @@ class SipSpider(CrawlSpider):
         if re.search(",", author):
             author = author.split(", ")  # Split authors into a list
         return author
+    
+
+    def get_price(self,response):
+        price = response.css('div.price-box p.special-price span.price::text').get().strip().replace('\xa0','')
+        return price
+
 
     # Helper function to extract the image URL
     def get_image_url(self, response):
@@ -110,15 +116,17 @@ class SipSpider(CrawlSpider):
             "div.product-essential-media div.product-view-image-product.fhs_img_frame_container img::attr(data-src)"
         ).get()
         return image_url
+    
+    
 
     # Helper function to download the image
     def download_image(self, image_url, genre):
         # Define folder paths for saving images
         folder_path = (
-            f"D:/study/OJT/project/data/books/{genre}/"  # Genre-specific folder
+            f"./books/{genre}/"  # Genre-specific folder
         )
         folder_path_all = (
-            "D:/study/OJT/project/data/bookss/"  # General folder for all images
+            "./bookss/"  # General folder for all images
         )
 
         if image_url:
