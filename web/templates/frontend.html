@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://tiki.vn/blog/wp-content/uploads/2023/08/thumb-12-696x464.jpg');
+            background-size: cover; 
+            background-position: center; 
+            background-attachment: fixed;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+        }
+        .result ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .result li {
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Book Search</h1>
+
+        <!-- Search by Title Form -->
+        <form id="searchByTitleForm" action="/search/title" method="POST">
+            <div class="form-group">
+                <label for="title">Enter Book Title</label>
+                <input type="text" id="title" name="title" placeholder="Enter book title" required>
+            </div>
+            <button type="submit">Search by Title</button>
+        </form>
+
+        <!-- Search by Image Form -->
+        <form id="searchByImageForm" action="/search/image" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="image">Upload Book Image</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+            <button type="submit">Search by Image</button>
+        </form>
+
+        <!-- Search Results -->
+        <div class="result" id="searchResults">
+            <!-- Results will be populated here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        // Handle search result display for title-based search
+        document.getElementById("searchByTitleForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch("/search/title", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById("searchResults");
+                if (data.error) {
+                    resultsContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    const resultsList = data.results.map(result => 
+                        `<li>${result.title} - ${result.author}</li>`
+                    ).join("");
+                    resultsContainer.innerHTML = `<ul>${resultsList}</ul>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("searchResults").innerHTML = "<p style='color: red;'>An error occurred. Please try again later.</p>";
+            });
+        });
+
+        // Handle search result display for image-based search
+        document.getElementById("searchByImageForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch("/search/image", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultsContainer = document.getElementById("searchResults");
+                if (data.error) {
+                    resultsContainer.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    const resultsList = data.results.map(result => 
+                        `<li>${result.title} - ${result.author}</li>`
+                    ).join("");
+                    resultsContainer.innerHTML = `<ul>${resultsList}</ul>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("searchResults").innerHTML = "<p style='color: red;'>An error occurred. Please try again later.</p>";
+            });
+        });
+    </script>
+
+</body>
+</html>
