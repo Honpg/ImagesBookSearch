@@ -1,0 +1,10 @@
+Pillow
+torch
+torchvision
+numpy
+scikit-learn
+httpx
+pymongo
+tritonclient
+gunicorn
+flask
